@@ -1,7 +1,7 @@
 [run]
 branch = True
-source = checkpoint
-include = */checkpoint/*
+source = electripy
+include = */electripy/*
 omit =
     */setup.py
 [report]
