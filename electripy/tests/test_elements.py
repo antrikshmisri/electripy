@@ -12,6 +12,9 @@ def test_element():
 
         def _add_to_app(self, app):
             return
+        
+        def _setup(self):
+            pass
 
     base_element = BaseElement('Button', (0, 0))
     child_element = BaseElement('Paragraph', (0, 0))
@@ -61,6 +64,9 @@ def test_element():
 
         def _add_to_app(self, app):
             return
+        
+        def _setup(self):
+            pass
 
     with npt.assert_raises(ValueError):
         _ = InvalidElement('InvalidElement', (0, 0))

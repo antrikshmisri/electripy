@@ -50,6 +50,12 @@ class Element(ABC):
 
         self._process_attributes()
 
+    @abstractmethod
+    def _setup(self):
+        """Setup the element."""
+        _msg = f'{self.name} has not been implemented.'
+        raise NotImplementedError(_msg)
+
     def _process_attributes(self):
         """Process the attributes of the element."""
         self.attributes['id'] = md5(self.name.encode()).hexdigest()
