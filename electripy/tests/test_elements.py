@@ -55,12 +55,12 @@ def test_element():
     class InvalidElement(Element):
         def __init__(self, name, position, parent=None):
             super(InvalidElement, self).__init__(name, position, parent)
-        
+
         def _get_element_tree(self):
             return {self.name: self.children}
-        
+
         def _add_to_app(self, app):
             return
-    
+
     with npt.assert_raises(ValueError):
         _ = InvalidElement('InvalidElement', (0, 0))

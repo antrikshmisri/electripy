@@ -9,7 +9,7 @@ from electripy.utils import __all_ui__ as all_ui
 
 class Element(ABC):
     """Base class for all UI elements.
-    
+
     Attributes
     ----------
     name : str
@@ -24,7 +24,7 @@ class Element(ABC):
 
     def __init__(self, name, position, parent=None):
         """Initialize the element.
-        
+
         Parameters
         ----------
         name : str
@@ -47,7 +47,7 @@ class Element(ABC):
 
         if self.parent:
             self.parent.add_child(self, position)
-        
+
         self._process_attributes()
 
     def _process_attributes(self):
@@ -81,7 +81,7 @@ class Element(ABC):
 
     def add_child(self, child, position=(0, 0)):
         """Add a child to this element.
-        
+
         Parameters
         ----------
         child : :class: `Element`
@@ -101,10 +101,10 @@ class Element(ABC):
         child.parent = self
         child.position = position
         self.children.append(child)
-    
+
     def remove_child(self, child):
         """Remove a child from this element.
-        
+
         Parameters
         ----------
         child : :class: `Element`
@@ -127,7 +127,7 @@ class Element(ABC):
 
     def add_style(self, style_dict):
         """Add style to the element.
-        
+
         Parameters
         ----------
         style_dict : dict

@@ -1,4 +1,3 @@
-from functools import partial
 import os
 from subprocess import PIPE, Popen
 
@@ -59,7 +58,8 @@ def shutdown(path, socketlist):
     socketlist: list
         The list of sockets to close.
     """
-    print(f"Shutting down UI with status code path: {path}, sockets: {socketlist}")
+    print(
+        f"Shutting down UI with status code path: {path}, sockets: {socketlist}")
     os._exit(1)
 
 
