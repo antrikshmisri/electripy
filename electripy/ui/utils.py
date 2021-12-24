@@ -65,7 +65,7 @@ def shutdown(path, socketlist):
 
 def init_ui(eel_port, frontend_port):
     """Initialize the UI.
-    
+
     Parameters
     ----------
     eel_port: int
