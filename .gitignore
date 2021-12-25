@@ -133,3 +133,16 @@ package-lock.json
 yarn.lock
 yarn-error.log
 
+
+#media
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+*.ico
+*.svg
+
+#logs
+*.log
