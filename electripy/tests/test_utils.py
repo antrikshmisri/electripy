@@ -16,8 +16,7 @@ def test_log_element():
     npt.assert_equal(
         f"<Image class={img.class_name} id={img.attributes['id']}>\n" in out,
         True)
-    
+
     npt.assert_equal(
         f"<Paragraph class={img_caption.class_name} id={img_caption.attributes['id']}>\n" in out,
         True)
-
