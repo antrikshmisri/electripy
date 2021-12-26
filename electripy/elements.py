@@ -417,6 +417,8 @@ class Image(Element):
             self.add_style({'width': f'{self.size[0]}px',
                             'height': f'{self.size[1]}px'})
 
+            self.img_data = self.img_data.resize(self.size)
+
         self.attributes['alt'] = self.alt_text
         self.attributes['src'] = self.src
 

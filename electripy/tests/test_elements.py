@@ -1,5 +1,5 @@
 import numpy.testing as npt
-from electripy.elements import Button, Element, Paragraph
+from electripy.elements import Button, Element, Image, Paragraph
 
 
 def test_element():
@@ -110,3 +110,29 @@ def test_paragraph():
 
     para.text = 'This is a new paragraph'
     npt.assert_equal(para.text, 'This is a new paragraph')
+
+
+def test_image():
+    url_image = Image(src="https://img.icons8.com/ios-glyphs/50/000000/python.png",
+                      class_name="python-icon", maintain_aspect=True)
+
+    npt.assert_equal(url_image.size, (50, 50))
+    npt.assert_equal(url_image.is_url, True)
+    npt.assert_equal(url_image.img_data.size, (50, 50))
+
+    img_style = url_image._parse_style()
+
+    npt.assert_equal(img_style['width'], '50px')
+    npt.assert_equal(img_style['height'], '50px')
+
+    force_img_size = Image(src="https://img.icons8.com/ios-glyphs/50/000000/python.png",
+                           class_name="python-icon", maintain_aspect=False, size=(100, 100))
+
+    npt.assert_equal(force_img_size.size, (100, 100))
+    npt.assert_equal(force_img_size.is_url, True)
+    npt.assert_equal(force_img_size.img_data.size, (100, 100))
+
+    force_img_size_style = force_img_size._parse_style()
+
+    npt.assert_equal(force_img_size_style['width'], '100px')
+    npt.assert_equal(force_img_size_style['height'], '100px')
