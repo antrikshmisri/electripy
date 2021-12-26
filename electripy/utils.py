@@ -13,10 +13,12 @@ def log_element_recursive(element, depth=0, out=""):
         name = item[0].name
         children = item[1]
 
-        out += f"|{'===>' * depth} <{name} class={item[0].attributes['class']} id={item[0].attributes['id']}>\n"
+        out += f"|{'===>' * depth} <{name} "
+        out += f"class={item[0].attributes['class']} "
+        out += f"id={item[0].attributes['id']}>\n"
 
         if children:
             for child in children:
                 out = log_element_recursive(child, depth + 1, out)
-    
+
     return out

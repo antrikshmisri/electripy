@@ -21,9 +21,9 @@ btn.icon.add_child(para, (0.5, 0.5))
 
 
 def log_element(element):
-    print("="*len(element.name))
+    print("=" * len(element.name))
     print(element.name)
-    print("="*len(element.name))
+    print("=" * len(element.name))
 
     print(f"{element.name} Tree:- \n{repr(element)}")
     print(f"{element.name} Attributes:- \n{element}")

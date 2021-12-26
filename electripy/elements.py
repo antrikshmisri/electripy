@@ -127,8 +127,6 @@ class Element(ABC):
 
         child.parent = self
         child.position = position
-
-        child.class_name = child.class_name
         self.children.append(child)
 
     def remove_child(self, child):
@@ -199,7 +197,7 @@ class Button(Element):
                  position=(0, 0), parent=None, font_size=10,
                  size=(100, 50), class_name=None, icon_name=None):
         """Initialize the button class.
-        
+
         Parameters
         ----------
         button_text: str
@@ -218,7 +216,7 @@ class Button(Element):
             The class name of the button.
         icon_name: str, optional
             The name of the icon to display inside the button.
-            Valid names are - 
+            Valid names are -
             * `add`
             * `delete`
             * `edit`
@@ -235,7 +233,7 @@ class Button(Element):
             * `right`
             * `check`
             * `uncheck`
-        
+
         Note
         ----
         You can add custom icon by using the `add_icon` method.
@@ -339,11 +337,11 @@ class Paragraph(Element):
     def _add_to_app(self, app):
         """Add the element and its children to the app."""
         app.add_paragraph(self)
-    
+
     @property
     def text(self):
         return self._text
-    
+
     @text.setter
     def text(self, text):
         self._text = text
@@ -356,7 +354,7 @@ class Image(Element):
                  alt_text=None, position=(0, 0), parent=None,
                  class_name=None):
         """Initialize the image class.
-        
+
         Parameters
         ----------
         src: str
