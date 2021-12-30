@@ -1,5 +1,5 @@
 import numpy.testing as npt
-from electripy.elements import Element
+from electripy.elements import Button, Element, Image, Paragraph
 
 
 def test_element():
@@ -12,6 +12,9 @@ def test_element():
 
         def _add_to_app(self, app):
             return
+
+        def _setup(self):
+            pass
 
     base_element = BaseElement('Button', (0, 0))
     child_element = BaseElement('Paragraph', (0, 0))
@@ -62,5 +65,74 @@ def test_element():
         def _add_to_app(self, app):
             return
 
+        def _setup(self):
+            pass
+
     with npt.assert_raises(ValueError):
         _ = InvalidElement('InvalidElement', (0, 0))
+
+
+def test_button():
+    basic_btn = Button('This is a button')
+
+    npt.assert_equal(basic_btn.name, 'Button')
+    npt.assert_equal(basic_btn.children[0].name, 'Paragraph')
+    npt.assert_equal(basic_btn.children[0].text, 'This is a button')
+
+    basic_btn_style = basic_btn._parse_style()
+    btn_para_style = basic_btn.children[0]._parse_style()
+
+    npt.assert_equal(basic_btn_style['position'], 'relative')
+    npt.assert_equal(btn_para_style['position'], 'absolute')
+    npt.assert_equal(btn_para_style['left'], '10%')
+    npt.assert_equal(btn_para_style['bottom'], '50%')
+
+    icon_btn = Button('This is a button', icon_name='add')
+    icon_url = icon_btn.icon_url_dict['add']
+
+    npt.assert_equal(icon_btn.icon.src, icon_url)
+    npt.assert_equal(icon_btn.icon.size, (50, 50))
+
+    icon_style = icon_btn.icon._parse_style()
+
+    npt.assert_equal(icon_style['position'], 'absolute')
+    npt.assert_equal(icon_style['left'], '90%')
+    npt.assert_equal(icon_style['bottom'], '50%')
+
+
+def test_paragraph():
+    para = Paragraph('This is a paragraph')
+    npt.assert_equal(para.text, 'This is a paragraph')
+
+    para_style = para._parse_style()
+    npt.assert_equal(para_style['position'], 'absolute')
+    npt.assert_equal(para_style['font-size'], '10px')
+
+    para.text = 'This is a new paragraph'
+    npt.assert_equal(para.text, 'This is a new paragraph')
+
+
+def test_image():
+    url_image = Image(src="https://img.icons8.com/ios-glyphs/50/000000/python.png",
+                      class_name="python-icon", maintain_aspect=True)
+
+    npt.assert_equal(url_image.size, (50, 50))
+    npt.assert_equal(url_image.is_url, True)
+    npt.assert_equal(url_image.img_data.size, (50, 50))
+
+    img_style = url_image._parse_style()
+
+    npt.assert_equal(img_style['width'], '50px')
+    npt.assert_equal(img_style['height'], '50px')
+
+    force_img_size = Image(src="https://img.icons8.com/ios-glyphs/50/000000/python.png",
+                           class_name="python-icon", maintain_aspect=False, size=(100, 100))
+
+    npt.assert_equal(force_img_size.size, (100, 100))
+    npt.assert_equal(force_img_size.is_url, True)
+    npt.assert_equal(force_img_size.img_data.size, (100, 100))
+
+    force_img_size_style = force_img_size._parse_style()
+
+    npt.assert_equal(force_img_size_style['width'], '100px')
+    npt.assert_equal(force_img_size_style['height'], '100px')
