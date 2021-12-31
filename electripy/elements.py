@@ -60,8 +60,17 @@ class Element(ABC):
         self._position = tuple()
         self.position = position
 
+        self._callbacks = {
+            'onClick': None,
+            'onChange': None,
+            'onFocus': None,
+            'onBlur': None,
+            'onKeyPress': None
+        }
+
         self._process_attributes()
         self._setup()
+        self._expose_callbacks()
 
     def __str__(self):
         """Return the string representation of the element."""
@@ -82,6 +91,32 @@ class Element(ABC):
         self.attributes['id'] = md5(
             f"{self.name}{self.class_name}".encode()).hexdigest()[:5]
         self.attributes['class'] = self.class_name
+
+    def _expose_callbacks(self):
+        """Expose all event callbacks to the frontend"""
+        for item in self._callbacks.items():
+            _evt, _callback = item
+            if _callback is None:
+                continue
+
+            _callback.__name__ = f"{self.attributes['id']}_{_evt}_callback"
+            eel.expose(_callback)
+
+    def add_callback(self, event_type, callback):
+        """Add a callback associated to a specific event type.
+        
+        Parameters
+        ----------
+        event_type: str
+            Type of event
+        callback: function
+            The callback to attach to the event
+        """
+        if event_type not in self._callbacks:
+            raise ValueError(
+                f'{event_type} is not a valid event type. Valid events are: {list(self._callbacks.keys())}')
+
+        self._callbacks.update({event_type: callback})
 
     @property
     def position(self):
@@ -267,22 +302,31 @@ class Button(Element):
         super(Button, self).__init__('Button', position, parent, class_name)
 
     def _setup(self):
-        """Setup this UI element"""
+        """Setup this UI element
+        
+        Create the paragraph element.
+        Create the icon element.
+        Add icon, paragraph to the element tree.
+        Add style to the element.
+        Add relevant event callbacks.
+        """
         self.paragraph = Paragraph(text=self.button_text,
                                    font_size=self.font_size,
-                                   class_name='btn_text')
+                                   class_name='btn-text')
 
         if self.icon_name:
             self.icon = Image(src=self.icon_url_dict[self.icon_name],
-                              class_name='btn_icon', maintain_aspect=True,
+                              class_name='btn-logo', maintain_aspect=True,
                               alt_text=self.icon_name)
 
             self.add_child(self.icon, position=(0.9, 0.5))
 
+        self.add_child(self.paragraph, (0.1, 0.5))
+
         self.add_style({'width': f'{self.size[0]}px',
                         'height': f'{self.size[1]}px'})
-
-        self.add_child(self.paragraph, (0.1, 0.5))
+        
+        self.add_callback('onClick', self.press_callback)
 
     def _get_element_tree(self):
         """Get the element tree."""
@@ -292,17 +336,11 @@ class Button(Element):
         """Add the element and its children to the app."""
         app.add_button(self)
 
-    @eel.expose
-    def on_press(self):
-        """Callback function to execute when the button is pressed."""
-        if self.press_callback:
-            self.press_callback()
-
 
 class Paragraph(Element):
     """Class to represent a paragraph."""
 
-    def __init__(self, text, font_size=10, position=(0, 0), parent=None, class_name=None):
+    def __init__(self, text, font_size=10, keypress_callback=None, position=(0, 0), parent=None, class_name=None):
         """Initialize the paragraph class.
 
         Parameters
@@ -311,6 +349,8 @@ class Paragraph(Element):
             Text to display
         font_size: int, optional
             Size of the text in pixels
+        keypress_callback: function, optional
+            Callback function to execute when a key is pressed.
         position: tuple, optional
             The position of the paragraph.
         parent: :class: `Element`, optional
@@ -322,6 +362,7 @@ class Paragraph(Element):
         self.text = text
 
         self.font_size = font_size
+        self.keypress_callback = keypress_callback
 
         super(Paragraph, self).__init__(
             'Paragraph', position, parent, class_name)
@@ -329,6 +370,7 @@ class Paragraph(Element):
     def _setup(self):
         """Setup this UI element."""
         self.add_style({'font-size': f'{self.font_size}px'})
+        self.add_callback('onKeyPress', self.keypress_callback)
 
     def _get_element_tree(self):
         """Get the element tree."""
