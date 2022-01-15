@@ -40,4 +40,34 @@ const isColorValid = (color) => {
   return false;
 };
 
-export { hexToRgb, rgbToHex, isColorValid };
+const convertColor = (color, asObject = false) => {
+  if (colorMap[color]) {
+    color = colorMap[color];
+  }
+
+  if (!color.startsWith("rgb")) {
+    color = hexToRgb(color);
+    if (asObject) {
+      return color;
+    }
+
+    color = `rgb(${color.r}, ${color.g}, ${color.b})`;
+    return color;
+  } else {
+    if (asObject) {
+      color = color
+        .replace("rgb", "")
+        .replace("(", "")
+        .replace(")", "")
+        .split(",");
+      return {
+        r: parseInt(color[0], 10),
+        g: parseInt(color[1], 10),
+        b: parseInt(color[2], 10),
+      };
+    }
+    return color;
+  }
+};
+
+export { hexToRgb, rgbToHex, isColorValid, convertColor };
