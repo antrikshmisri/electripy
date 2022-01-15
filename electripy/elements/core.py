@@ -1,16 +1,13 @@
-"""Module for the creation of the elements."""
-import json
 import os
 from abc import ABC, abstractmethod
 from hashlib import md5
 from urllib.request import urlretrieve
 
-import eel
 import numpy as np
-from PIL import Image as PILImage
-
+from electripy import eel
 from electripy.utils import __all_ui__ as all_ui
 from electripy.utils import log_element_recursive
+from PIL import Image as PILImage
 
 
 class Element(ABC):
@@ -60,15 +57,20 @@ class Element(ABC):
         self._position = tuple()
         self.position = position
 
+        self._callbacks = {
+            'onClick': None,
+            'onChange': None,
+            'onFocus': None,
+            'onBlur': None,
+            'onKeyPress': None
+        }
+
         self._process_attributes()
         self._setup()
+        self._expose_callbacks()
 
     def __str__(self):
         """Return the string representation of the element."""
-        return json.dumps(self.attributes, indent=4)
-
-    def __repr__(self):
-        """Return the representation of the element."""
         return log_element_recursive(self)
 
     @abstractmethod
@@ -82,6 +84,32 @@ class Element(ABC):
         self.attributes['id'] = md5(
             f"{self.name}{self.class_name}".encode()).hexdigest()[:5]
         self.attributes['class'] = self.class_name
+
+    def _expose_callbacks(self):
+        """Expose all event callbacks to the frontend"""
+        for item in self._callbacks.items():
+            _evt, _callback = item
+            if _callback is None:
+                continue
+
+            _callback.__name__ = f"{self.attributes['id']}_{_evt}_callback"
+            eel.expose(_callback)
+
+    def add_callback(self, event_type, callback):
+        """Add a callback associated to a specific event type.
+        
+        Parameters
+        ----------
+        event_type: str
+            Type of event
+        callback: function
+            The callback to attach to the event
+        """
+        if event_type not in self._callbacks:
+            raise ValueError(
+                f'{event_type} is not a valid event type. Valid events are: {list(self._callbacks.keys())}')
+
+        self._callbacks.update({event_type: callback})
 
     @property
     def position(self):
@@ -147,9 +175,9 @@ class Element(ABC):
         raise NotImplementedError(_msg)
 
     @abstractmethod
-    def _add_to_app(self, app):
+    def add_to_app(self, app):
         """Add the element and its children to the app."""
-        _msg = '_add_to_app() must be implemented.'
+        _msg = 'add_to_app() must be implemented.'
         raise NotImplementedError(_msg)
 
     def add_style(self, style_dict):
@@ -190,119 +218,49 @@ class Element(ABC):
         self._class_name = class_name
 
 
-class Button(Element):
-    """Class to represent a Button."""
+class Body(Element):
+    """Class to represent the body."""
 
-    def __init__(self, button_text, press_callback=None,
-                 position=(0, 0), parent=None, font_size=10,
-                 size=(100, 50), class_name=None, icon_name=None):
-        """Initialize the button class.
-
-        Parameters
-        ----------
-        button_text: str
-            Text to display inside the button
-        press_callback: function, optional
-            Callback function to execute when the button is pressed.
-        position: tuple, optional
-            The position of the button.
-        parent: :class: `Element`, optional
-            The parent element.
-        font_size: int, optional
-            The font size of the button text.
-        size: tuple, optional
-            The size of the button.
-        class_name: str, optional
-            The class name of the button.
-        icon_name: str, optional
-            The name of the icon to display inside the button.
-            Valid names are -
-            * `add`
-            * `delete`
-            * `edit`
-            * `save`
-            * `cancel`
-            * `play`
-            * `pause`
-            * `stop`
-            * `next`
-            * `previous`
-            * `up`
-            * `down`
-            * `left`
-            * `right`
-            * `check`
-            * `uncheck`
-
-        Note
-        ----
-        You can add custom icon by using the `add_icon` method.
+    def __init__(self, elements=None, padding=(0, 0)):
+        """Initialize the body element.
+        
+        Parameter
+        ---------
+        elements: list of tuples
+            List of (element, position) tuples
+        padding: tuple
+            The padding of the body.
         """
-        self.name = 'Button'
-        self.button_text = button_text
-        self.press_callback = press_callback
-
-        self.font_size = font_size
-        self.size = size
-        self.icon_name = icon_name or ''
-
-        self.icon_url_dict = {
-            'add': 'https://img.icons8.com/material-outlined/24/000000/add.png',
-            'delete': 'https://img.icons8.com/material-outlined/24/000000/delete-forever.png',
-            'edit': 'https://img.icons8.com/material-outlined/24/000000/edit.png',
-            'save': 'https://img.icons8.com/material-outlined/24/000000/save.png',
-            'cancel': 'https://img.icons8.com/material-outlined/24/000000/cancel.png',
-            'play': 'https://img.icons8.com/material-outlined/24/000000/play.png',
-            'pause': 'https://img.icons8.com/material-outlined/24/000000/pause.png',
-            'stop': 'https://img.icons8.com/material-outlined/24/000000/stop.png',
-            'next': 'https://img.icons8.com/material-outlined/24/000000/next.png',
-            'previous': 'https://img.icons8.com/material-outlined/24/000000/previous.png',
-            'up': 'https://img.icons8.com/material-outlined/24/000000/up-arrow.png',
-            'down': 'https://img.icons8.com/material-outlined/24/000000/down-arrow.png',
-            'left': 'https://img.icons8.com/material-outlined/24/000000/left-arrow.png',
-            'right': 'https://img.icons8.com/material-outlined/24/000000/right-arrow.png',
-            'check': 'https://img.icons8.com/material-outlined/24/000000/checkmark.png',
-            'uncheck': 'https://img.icons8.com/material-outlined/24/000000/cancel.png',
-        }
-        super(Button, self).__init__('Button', position, parent, class_name)
+        self.elements = elements or []
+        self.padding = padding
+        super(Body, self).__init__(name='Body', class_name='body')
 
     def _setup(self):
-        """Setup this UI element"""
-        self.paragraph = Paragraph(text=self.button_text,
-                                   font_size=self.font_size,
-                                   class_name='btn_text')
+        for element_tuple in self.elements:
+            element, position = element_tuple
+            self.add_child(element, position)
 
-        if self.icon_name:
-            self.icon = Image(src=self.icon_url_dict[self.icon_name],
-                              class_name='btn_icon', maintain_aspect=True,
-                              alt_text=self.icon_name)
-
-            self.add_child(self.icon, position=(0.9, 0.5))
-
-        self.add_style({'width': f'{self.size[0]}px',
-                        'height': f'{self.size[1]}px'})
-
-        self.add_child(self.paragraph, (0.1, 0.5))
+        self.add_style({'padding': f'{self.padding[0]}px {self.padding[1]}px'})
 
     def _get_element_tree(self):
-        """Get the element tree."""
         return {self: self.children}
-
-    def _add_to_app(self, app):
-        """Add the element and its children to the app."""
-        app.add_button(self)
-
-    @eel.expose
-    def on_press(self):
-        """Callback function to execute when the button is pressed."""
-        if self.press_callback:
-            self.press_callback()
+    
+    def add_to_app(self, app):
+        """Add the body to the app.
+        
+        Parameters
+        ----------
+        app : :class: `App`
+            The app to add the body to.
+        """
+        pass
 
 
 class Paragraph(Element):
     """Class to represent a paragraph."""
 
-    def __init__(self, text, font_size=10, position=(0, 0), parent=None, class_name=None):
+    def __init__(self, text, font_size=10, keypress_callback=None,
+                 position=(0, 0), parent=None, class_name=None):
         """Initialize the paragraph class.
 
         Parameters
@@ -311,6 +269,8 @@ class Paragraph(Element):
             Text to display
         font_size: int, optional
             Size of the text in pixels
+        keypress_callback: function, optional
+            Callback function to execute when a key is pressed.
         position: tuple, optional
             The position of the paragraph.
         parent: :class: `Element`, optional
@@ -322,6 +282,7 @@ class Paragraph(Element):
         self.text = text
 
         self.font_size = font_size
+        self.keypress_callback = keypress_callback
 
         super(Paragraph, self).__init__(
             'Paragraph', position, parent, class_name)
@@ -329,14 +290,15 @@ class Paragraph(Element):
     def _setup(self):
         """Setup this UI element."""
         self.add_style({'font-size': f'{self.font_size}px'})
+        self.add_callback('onKeyPress', self.keypress_callback)
 
     def _get_element_tree(self):
         """Get the element tree."""
         return {self: self.children}
 
-    def _add_to_app(self, app):
+    def add_to_app(self, app):
         """Add the element and its children to the app."""
-        app.add_paragraph(self)
+        app.root.add_child(self, self.position)
 
     @property
     def text(self):
@@ -426,9 +388,9 @@ class Image(Element):
         """Get the element tree."""
         return {self: self.children}
 
-    def _add_to_app(self, app):
+    def add_to_app(self, app):
         """Add the element and its children to the app."""
-        app.add_image(self)
+        app.root.add_child(self, self.position)
 
     @property
     def img_data(self):
