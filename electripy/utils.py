@@ -1,4 +1,7 @@
+from subprocess import Popen, PIPE, CalledProcessError
+
 __all_ui__ = {
+    'Body',
     'Button',
     'Paragraph',
     'Heading',
@@ -22,3 +25,25 @@ def log_element_recursive(element, depth=0, out=""):
                 out = log_element_recursive(child, depth + 1, out)
 
     return out
+
+
+def execute_command(command):
+    """Execute a command and get continuous output.
+    Parameters
+    ----------
+    command : str
+        Command to execute.
+    Yields
+    ------
+    line: str
+        Output line.
+    """
+    popen = Popen(command, stdout=PIPE, stderr=PIPE,
+                  shell=True, universal_newlines=True)
+    for stdout_line in iter(popen.stdout.readline, ""):
+        yield stdout_line
+
+    popen.stdout.close()
+    return_code = popen.wait()
+    if return_code:
+        raise CalledProcessError(return_code, command)
