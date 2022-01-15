@@ -1,33 +1,31 @@
-@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@500&display=swap");
 
 body {
   margin: 0;
   padding: 0;
   background: #222;
+  box-sizing: border-box;
 }
 
 * {
-  font-family: 'Baloo 2', cursive;
+  font-family: "Baloo 2", cursive;
 }
 
 button {
   border: none;
   font-size: inherit;
   color: inherit;
-  background: none;
   cursor: pointer;
   padding: 25px 80px;
   margin: 15px 30px;
   text-transform: uppercase;
   font-weight: 700;
   outline: none;
-  position: relative;
-  -webkit-transition: 0.5s cubic-bezier(0.075, 0.82, 0.165, 1);
-  -moz-transition: 0.5s cubic-bezier(0.075, 0.82, 0.165, 1);
-  transition: 0.5s cubic-bezier(0.075, 0.82, 0.165, 1);
+  -webkit-transition: 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  -moz-transition: 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  transition: 0.5s cubic-bezier(0.23, 1, 0.32, 1);
   position: relative;
 }
-
 
 button .icon-container .btn-logo {
   position: absolute;
@@ -37,8 +35,9 @@ button .icon-container .btn-logo {
   bottom: calc(50% - 25px);
 }
 
-button .icon-container, button .text-container {
-  transition: 0.5s cubic-bezier(0.075, 0.82, 0.165, 1);
+button .icon-container,
+button .text-container {
+  transition: 0.5s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 button .icon-container {
@@ -58,6 +57,14 @@ button .text-container {
   top: 0;
   left: 50px;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+}
+
+.pressed {
+  transform: translateY(2px) scaleX(0.99) scaleY(0.99);
+}
+
+.idle {
+  transform: translateY(0px) scaleX(1) scaleY(1);
 }
