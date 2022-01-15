@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { eel } from "../eel";
 
-import colorMap from "../constants/colorMap";
-import { hexToRgb } from "../utils/colorConversions";
+import { convertColor } from "../utils/colorConversions";
 import Paragraph from "./Paragraph";
 import Image from "./Image";
 
@@ -18,7 +17,10 @@ const Button = ({
   const [backgroundColor, setBackgroundColor] = useState({
     normal: "",
     dark: "",
+    darker: "",
   });
+  const [pressed, setPressed] = useState(false);
+
   const iconContainerRef = useRef(null);
   const textContainerRef = useRef(null);
 
@@ -38,42 +40,31 @@ const Button = ({
     setBackgroundColor({
       normal: styleSheet.backgroundColor,
       dark: `rgb(${darkenedColor[0]}, ${darkenedColor[1]}, ${darkenedColor[2]})`,
+      darker: `rgb(${darkenedColor[0] * darkFactor}, ${
+        darkenedColor[1] * darkFactor
+      }, ${darkenedColor[2] * darkFactor})`,
     });
   }, []);
 
-  const convertColor = (color, asObject = false) => {
-    if (colorMap[color]) {
-      color = colorMap[color];
-    }
-
-    if (!color.startsWith("rgb")) {
-      color = hexToRgb(color);
-      if (asObject) {
-        return color;
-      }
-
-      color = `rgb(${color.r}, ${color.g}, ${color.b})`;
-      return color;
-    } else {
-      if (asObject) {
-        color = color
-          .replace("rgb", "")
-          .replace("(", "")
-          .replace(")", "")
-          .split(",");
-        return {
-          r: parseInt(color[0], 10),
-          g: parseInt(color[1], 10),
-          b: parseInt(color[2], 10),
-        };
-      }
-      return color;
-    }
-  };
-
   return (
     <button
-      onClick={onClick || eel[`${id}_onClick_callback`]}
+      onClick={(e) => {
+        onClick ? onClick(e) : eel[`${id}_onClick_callback`](e);
+      }}
+      onMouseDown={() => {
+        setPressed(true);
+        iconContainerRef.current.style.backgroundColor = backgroundColor.darker;
+        setStyleSheet({
+          ...styleSheet,
+          outline: `3px solid ${backgroundColor.dark
+            .replace("(", ", 1)")
+            .replace("rgb", "rgba")}`,
+        });
+      }}
+      onMouseUp={() => {
+        setPressed(false);
+        iconContainerRef.current.style.backgroundColor = backgroundColor.dark;
+      }}
       onMouseEnter={() => {
         iconContainerRef.current.style.width = "100%";
         setStyleSheet({
@@ -90,9 +81,9 @@ const Button = ({
       }}
       style={styleSheet}
       id={id}
-      className={className}
+      className={`${className} ${pressed ? "pressed" : "idle"}`}
     >
-      {children.map((child, idx) => {
+      {children.map((child, _) => {
         const { className, ...props } = child.props;
 
         switch (child.type) {
